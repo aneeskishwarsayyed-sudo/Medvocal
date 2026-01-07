@@ -33,6 +33,7 @@ class Input(BaseModel):
 
 @app.post("/triage")
 async def triage(data: Input):
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModelmodel("models/gemini-pro")
+
     r = model.generate_content(f"{SYSTEM}\nPatient says: {data.text}")
     return {"result": r.text}
