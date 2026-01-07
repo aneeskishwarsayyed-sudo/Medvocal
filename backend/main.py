@@ -6,9 +6,10 @@ import os
 
 app = FastAPI()
 
+# 🚨 THIS IS THE CRITICAL FIX
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://medvocal-1.web.app"],   # Allow Firebase site ONLY
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -19,24 +20,12 @@ genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 SYSTEM = """
 You are a certified emergency triage nurse AI using Emergency Severity Index (ESI).
 
-Classify based on:
-• Airway, Breathing, Circulation
-• Mental status
-• Severe pain, bleeding, fever, trauma
-
-Return ONLY JSON in this exact format:
-
+Return ONLY JSON:
 {
  "severity":"RED|YELLOW|GREEN",
  "reason":"SHORT CLINICAL JUSTIFICATION",
  "action":"CLEAR FIRST AID STEPS + WHEN TO GO HOSPITAL"
 }
-
-Rules:
-RED = life-threatening
-YELLOW = urgent but stable
-GREEN = mild / home care
-No chit chat.
 """
 
 class Input(BaseModel):
