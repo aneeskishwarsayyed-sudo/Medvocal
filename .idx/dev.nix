@@ -1,38 +1,29 @@
-# To learn more about how to use Nix to configure your environment
-# see: https://developers.google.com/idx/guides/customize-idx-env
 { pkgs, ... }: {
-  # Which nixpkgs channel to use.
-  channel = "stable-24.05"; # or "unstable"
-  # Use https://search.nixos.org/packages to find packages
+  channel = "stable-24.11";
+
   packages = [
     pkgs.nodejs_20
+
+    (pkgs.python311.withPackages (ps: with ps; [
+      pip
+      fastapi
+      uvicorn
+      python-multipart
+      google-generativeai
+      google-cloud-speech
+      google-cloud-spanner
+    ]))
   ];
-  # Sets environment variables in the workspace
-  env = {};
+
+  env = {
+    GEMINI_API_KEY = "PASTE_YOUR_REAL_GEMINI_KEY_HERE";
+  };
+
   idx = {
-    # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      # "vscodevim.vim"
+      "ms-python.python"
       "google.gemini-cli-vscode-ide-companion"
     ];
-    workspace = {
-      # Runs when a workspace is first created with this `dev.nix` file
-      onCreate = {
-        npm-install = "npm ci --no-audit --prefer-offline --no-progress --timing";
-        # Open editors for the following files by default, if they exist:
-        default.openFiles = [ "index.html" "main.js" ];
-      };
-      # To run something each time the workspace is (re)started, use the `onStart` hook
-    };
-    # Enable previews and customize configuration
-    previews = {
-      enable = true;
-      previews = {
-        web = {
-          command = ["npm" "run" "dev" "--" "--port" "$PORT"];
-          manager = "web";
-        };
-      };
-    };
+    previews = { enable = true; };
   };
 }
