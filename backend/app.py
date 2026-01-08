@@ -6,7 +6,6 @@ import os
 
 app = FastAPI()
 
-# Configure CORS for your Firebase frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -18,18 +17,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize Gemini with your Environment Variable
+# Initialize Gemini
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 SYSTEM = """
 You are a certified emergency triage nurse AI using Emergency Severity Index (ESI).
-
 Return ONLY JSON:
-{
- "severity":"RED|YELLOW|GREEN",
- "reason":"SHORT CLINICAL JUSTIFICATION",
- "action":"CLEAR FIRST AID STEPS + WHEN TO GO HOSPITAL"
-}
+{"severity":"RED|YELLOW|GREEN", "reason":"...", "action":"..."}
 """
 
 class Input(BaseModel):
@@ -41,13 +35,14 @@ def root():
 
 async def get_triage_response(user_text: str):
     try:
-        # Changed 'models/gemini-pro' to 'gemini-1.5-flash' to fix the 404 error
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        # Use the explicit models/ prefix for better compatibility
+        model = genai.GenerativeModel("models/gemini-1.5-flash")
         prompt = f"{SYSTEM}\nPatient says: {user_text}"
         r = model.generate_content(prompt)
         return {"result": r.text}
     except Exception as e:
-        # This catches errors (like API issues) and returns a 500 status with the message
+        # THIS IS KEY: It prints the error to your Render Logs so we can see it
+        print(f"TRIAE_ERROR: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/triage")
