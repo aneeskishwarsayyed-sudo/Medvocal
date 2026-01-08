@@ -37,16 +37,14 @@ class Input(BaseModel):
 def root():
     return {"status": "Med-Vocal backend running"}
 
-# MAIN ROUTE
 @app.post("/api/triage")
 async def triage(data: Input):
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("models/gemini-pro")
     r = model.generate_content(f"{SYSTEM}\nPatient says: {data.text}")
     return {"result": r.text}
 
-# FALLBACK ROUTE
 @app.post("/triage")
 async def triage_alias(data: Input):
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("models/gemini-pro")
     r = model.generate_content(f"{SYSTEM}\nPatient says: {data.text}")
     return {"result": r.text}
