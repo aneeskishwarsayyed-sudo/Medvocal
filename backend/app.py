@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import google.generativeai as genai
@@ -6,6 +6,7 @@ import os
 
 app = FastAPI()
 
+# Configure CORS for your Firebase frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -17,6 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialize Gemini with your Environment Variable
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 SYSTEM = """
@@ -37,14 +39,21 @@ class Input(BaseModel):
 def root():
     return {"status": "Med-Vocal backend running"}
 
+async def get_triage_response(user_text: str):
+    try:
+        # Changed 'models/gemini-pro' to 'gemini-1.5-flash' to fix the 404 error
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        prompt = f"{SYSTEM}\nPatient says: {user_text}"
+        r = model.generate_content(prompt)
+        return {"result": r.text}
+    except Exception as e:
+        # This catches errors (like API issues) and returns a 500 status with the message
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/triage")
 async def triage(data: Input):
-    model = genai.GenerativeModel("models/gemini-pro")
-    r = model.generate_content(f"{SYSTEM}\nPatient says: {data.text}")
-    return {"result": r.text}
+    return await get_triage_response(data.text)
 
 @app.post("/triage")
 async def triage_alias(data: Input):
-    model = genai.GenerativeModel("models/gemini-pro")
-    r = model.generate_content(f"{SYSTEM}\nPatient says: {data.text}")
-    return {"result": r.text}
+    return await get_triage_response(data.text)
