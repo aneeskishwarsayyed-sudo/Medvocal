@@ -6,10 +6,9 @@ import os
 
 app = FastAPI()
 
-# 🚨 THIS IS THE CRITICAL FIX
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://medvocal-1.web.app"],   # Allow Firebase site ONLY
+    allow_origins=["https://medvocal-1.web.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,9 +30,12 @@ Return ONLY JSON:
 class Input(BaseModel):
     text: str
 
-@app.post("/triage")
-async def triage(data: Input):
-    model = genai.GenerativeModelmodel("models/gemini-pro")
+@app.get("/")
+def root():
+    return {"status":"Med-Vocal backend running"}
 
+@app.post("/api/triage")
+async def triage(data: Input):
+    model = genai.GenerativeModel("models/gemini-pro")
     r = model.generate_content(f"{SYSTEM}\nPatient says: {data.text}")
     return {"result": r.text}
