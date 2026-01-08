@@ -42,3 +42,8 @@ async def triage(data: Input):
     model = genai.GenerativeModel("models/gemini-pro")
     r = model.generate_content(f"{SYSTEM}\nPatient says: {data.text}")
     return {"result": r.text}
+@app.post("/triage")
+async def triage_alias(data: Input):
+    model = genai.GenerativeModel("models/gemini-pro")
+    r = model.generate_content(f"{SYSTEM}\nPatient says: {data.text}")
+    return {"result": r.text}
