@@ -8,7 +8,10 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://medvocal-1.web.app"],
+    allow_origins=[
+        "https://medvocal-1.web.app",
+        "https://medvocal-1.firebaseapp.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
